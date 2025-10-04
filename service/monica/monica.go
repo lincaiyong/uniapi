@@ -156,19 +156,20 @@ func buildBody(model, question string) string {
 	return string(b)
 }
 
-var gSessionId string
+var gModel, gSessionId string
 
-func SetSessionId(sessionId string) {
+func Init(model, sessionId string) {
+	gModel = model
 	gSessionId = sessionId
 }
 
-func ChatCompletion(model, q string, f func(string)) (string, error) {
+func ChatCompletion(q string, f func(string)) (string, error) {
 	if gSessionId == "" {
-		return "", fmt.Errorf("gSessionId is empty, call SetSessionId() first")
+		return "", fmt.Errorf("gSessionId is empty, call Init() first")
 	}
 
 	url := "https://api.monica.im/api/custom_bot/chat"
-	body := buildBody(model, q)
+	body := buildBody(gModel, q)
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
 		return "", fmt.Errorf("fail to create request: %v", err)
