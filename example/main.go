@@ -8,7 +8,7 @@ import (
 )
 
 func monicaExample() {
-	monica.Init(monica.ModelGPT41Nano, os.Getenv("MONICA_SESSION_ID"))
+	monica.Init(monica.ModelClaude4Sonnet, os.Getenv("MONICA_SESSION_ID"))
 	_, err := monica.ChatCompletion("hi", func(s string) {
 		fmt.Print(s)
 	})

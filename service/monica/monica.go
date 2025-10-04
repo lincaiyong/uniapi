@@ -178,7 +178,9 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
 
-	client := &http.Client{}
+	client := &http.Client{Transport: &http.Transport{
+		ForceAttemptHTTP2: false,
+	}}
 	var resp *http.Response
 	for i := 0; i < 3; i++ {
 		resp, err = client.Do(req)
@@ -205,13 +207,16 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 		if strings.HasPrefix(line, "data:") {
 			data := strings.Trim(line[5:], " ")
 			var chunk struct {
-				Text string `json:"text"`
+				Text  string `json:"text"`
+				Error any    `json:"error"`
 			}
 			err = json.Unmarshal([]byte(data), &chunk)
 			if err != nil {
 				return "", fmt.Errorf("fail to unmarshal json: %v", err)
 			}
-
+			if chunk.Error != nil {
+				return "", fmt.Errorf("get monica response with error: %v", chunk.Error)
+			}
 			f(chunk.Text)
 			sb.WriteString(chunk.Text)
 		} else if line != "" {
