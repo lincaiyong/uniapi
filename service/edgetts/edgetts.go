@@ -14,22 +14,22 @@ import (
 	"time"
 )
 
-func generateSecMsGec(trustedClientToken string) string {
+func generateSecMsGec(edgeToken string) string {
 	ticks := float64(time.Now().UTC().Unix() + 11644473600)
 	ticks = (ticks - math.Mod(ticks, 300)) * 1e7
-	strToHash := fmt.Sprintf("%.0f%s", ticks, trustedClientToken)
+	strToHash := fmt.Sprintf("%.0f%s", ticks, edgeToken)
 	hash := sha256.Sum256([]byte(strToHash))
 	return strings.ToUpper(hex.EncodeToString(hash[:]))
 }
 
 func EdgeTTS(text string) ([]byte, error) {
-	trustedClientToken := "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
+	edgeToken := "6A5AA1D4EAFF4E9FB37E23D68491D6F4" // check https://github.com/rany2/edge-tts/blob/master/src/edge_tts/constants.py
 	baseUrl := "api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
 	userAgent := "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
 	connectId := strings.ReplaceAll(uuid.New().String(), "-", "")
-	token := generateSecMsGec(trustedClientToken)
+	token := generateSecMsGec(edgeToken)
 	wssUrl := fmt.Sprintf("wss://%s?Ocp-Apim-Subscription-Key=%s&ConnectionId=%s&Sec-MS-GEC=%s&Sec-MS-GEC-Version=1-140.0.3485.14",
-		baseUrl, trustedClientToken, connectId, token)
+		baseUrl, edgeToken, connectId, token)
 	conn, _, err := websocket.DefaultDialer.Dial(wssUrl, http.Header{
 		"User-Agent": []string{userAgent},
 	})
