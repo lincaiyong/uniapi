@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"os"
@@ -32,9 +33,24 @@ func fornextExample() {
 	fmt.Println()
 }
 
+func edgettsExample() {
+	b, err := edgetts.EdgeTTS("你好，春眠不觉晓")
+	if err != nil {
+		fmt.Printf("fail to run edgetts: %v\n", err)
+		os.Exit(1)
+	}
+	err = os.WriteFile("output.wav", b, 0644)
+	if err != nil {
+		fmt.Printf("fail to write edgetts: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("saved to output.wav")
+}
+
 func main() {
 	os.Args = []string{"x", "monica"}
 	//os.Args[1] = "fornext"
+	os.Args[1] = "edgetts"
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: main <service>")
 		os.Exit(1)
@@ -45,5 +61,7 @@ func main() {
 		monicaExample()
 	case "fornext":
 		fornextExample()
+	case "edgetts":
+		edgettsExample()
 	}
 }
