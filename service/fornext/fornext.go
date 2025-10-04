@@ -69,7 +69,10 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Agw-Js-Conv", "str")
 
-	client := &http.Client{}
+	client := &http.Client{Transport: &http.Transport{
+		ForceAttemptHTTP2: false,
+		Proxy:             http.ProxyFromEnvironment,
+	}}
 	var resp *http.Response
 	for i := 0; i < 3; i++ {
 		resp, err = client.Do(req)

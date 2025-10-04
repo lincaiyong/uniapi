@@ -9,7 +9,7 @@ import (
 
 func monicaExample() {
 	monica.Init(monica.ModelClaude4Sonnet, os.Getenv("MONICA_SESSION_ID"))
-	_, err := monica.ChatCompletion("hi", func(s string) {
+	_, err := monica.ChatCompletion("131加412", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -22,7 +22,7 @@ func monicaExample() {
 func fornextExample() {
 	fornext.Init(os.Getenv("FORNEXT_SPACE_ID"), os.Getenv("FORNEXT_MODEL_NAME"), os.Getenv("FORNEXT_MODEL_ID"),
 		os.Getenv("FORNEXT_PROMPT_KEY"), os.Getenv("FORNEXT_PROMPT_PLATFORM_SESSION"))
-	_, err := fornext.ChatCompletion("hi", func(s string) {
+	_, err := fornext.ChatCompletion("3+4=", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -34,7 +34,7 @@ func fornextExample() {
 
 func main() {
 	os.Args = []string{"x", "monica"}
-	os.Args[1] = "fornext"
+	//os.Args[1] = "fornext"
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: main <service>")
 		os.Exit(1)

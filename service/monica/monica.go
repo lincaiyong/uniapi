@@ -2,59 +2,14 @@ package monica
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/lincaiyong/uniapi/utils"
 	"net/http"
 	"strings"
 )
-
-//	const bodyTemplate = `{
-//	   "task_uid": "task:<task>",
-//	   "bot_uid": "monica",
-//	   "data": {
-//	       "conversation_id": "conv:<conv>",
-//	       "items": [
-//	           {
-//	               "item_id": "msg:<msg1>",
-//	               "conversation_id": "conv:<conv>",
-//	               "item_type": "reply",
-//	               "summary": "__RENDER_BOT_WELCOME_MSG__",
-//	               "data": {
-//	                   "type": "text",
-//	                   "content": "__RENDER_BOT_WELCOME_MSG__"
-//	               }
-//	           },
-//	           {
-//	               "conversation_id": "conv:<conv>",
-//	               "item_id": "msg:<msg2>",
-//	               "item_type": "question",
-//	               "parent_item_id": "msg:<msg1>",
-//	               "data": {
-//	                   "type": "text",
-//	                   "content": <q>,
-//	                   "quote_content": "",
-//	                   "max_token": 0,
-//	                   "is_incognito": false
-//	               }
-//	           }
-//	       ],
-//	       "pre_generated_reply_id": "msg:<msg3>",
-//	       "pre_parent_item_id": "msg:<msg2>",
-//	       "origin": "https://monica.im/home/chat/Monica/monica",
-//	       "origin_page_title": "New Chat",
-//	       "trigger_by": "auto",
-//	       "use_model": "<model>",
-//	       "is_incognito": false,
-//	       "use_new_memory": true,
-//	       "use_memory_suggestion": true
-//	   },
-//	   "language": "auto",
-//	   "locale": "zh_CN",
-//	   "task_type": "chat_with_custom_bot",
-//	   "tool_data": {},
-//	   "ai_resp_language": "Chinese (Simplified)"
-//	}`
 
 type Body struct {
 	TaskUid        string   `json:"task_uid"` // task:<task>
@@ -68,41 +23,42 @@ type Body struct {
 }
 
 type BodyData struct {
-	ConversationId      string `json:"conversation_id"`        // conv:<conv>
-	PreGeneratedReplyId string `json:"pre_generated_reply_id"` // msg:<msg3>
-	PreParentItemId     string `json:"pre_parent_item_id"`     // msg:<msg2>
-	Origin              string `json:"origin"`                 // https://monica.im/home/chat/Monica/monica
-	OriginPageTitle     string `json:"origin_page_title"`      // New Chat
-	TriggerBy           string `json:"trigger_by"`             // auto
-	UseModel            string `json:"use_model"`              // <model>
-	IsIncognito         bool   `json:"is_incognito"`           // false
-	UseNewMemory        bool   `json:"use_new_memory"`         // true
-	UseMemorySuggestion bool   `json:"use_memory_suggestion"`  // true
-	Items               []BodyDataItem
+	ConversationId      string         `json:"conversation_id"`        // conv:<conv>
+	PreGeneratedReplyId string         `json:"pre_generated_reply_id"` // msg:<msg3>
+	PreParentItemId     string         `json:"pre_parent_item_id"`     // msg:<msg2>
+	Origin              string         `json:"origin"`                 // https://monica.im/home/chat/Monica/monica
+	OriginPageTitle     string         `json:"origin_page_title"`      // New Chat
+	TriggerBy           string         `json:"trigger_by"`             // auto
+	UseModel            string         `json:"use_model"`              // <model>
+	IsIncognito         bool           `json:"is_incognito"`           // false
+	UseNewMemory        bool           `json:"use_new_memory"`         // true
+	UseMemorySuggestion bool           `json:"use_memory_suggestion"`  // true
+	Items               []BodyDataItem `json:"items"`
 }
 
 type BodyDataItem struct {
-	ItemId         string           `json:"item_id"`           // msg:<msg1> / msg:<msg2>
-	ConversationId string           `json:"conversation_id"`   // conv:<conv> / conv:<conv>
-	ItemType       string           `json:"item_type"`         // reply / question
-	Summary        string           `json:"summary,omitempty"` // __RENDER_BOT_WELCOME_MSG__ / ""
+	ItemId         string           `json:"item_id"`                  // msg:<msg1> / msg:<msg2>
+	ConversationId string           `json:"conversation_id"`          // conv:<conv> / conv:<conv>
+	ItemType       string           `json:"item_type"`                // reply / question
+	Summary        string           `json:"summary,omitempty"`        // __RENDER_BOT_WELCOME_MSG__ / nil
+	ParentItemId   string           `json:"parent_item_id,omitempty"` // nil / msg:<msg1>
 	Data           BodyDataItemData `json:"data"`
 }
 
 type BodyDataItemData struct {
-	Type         string `json:"text"`          // text / text
-	Content      string `json:"content"`       // __RENDER_BOT_WELCOME_MSG__ / <q>
-	QuoteContent string `json:"quote_content"` // nil / ""
-	MaxToken     int    `json:"max_token"`     // nil / 0
-	IsIncognito  bool   `json:"is_incognito"`  // nil / false
+	Type         string  `json:"type"`                    // text / text
+	Content      string  `json:"content"`                 // __RENDER_BOT_WELCOME_MSG__ / <q>
+	QuoteContent *string `json:"quote_content,omitempty"` // nil / ""
+	MaxToken     *int    `json:"max_token,omitempty"`     // nil / 0
+	IsIncognito  *bool   `json:"is_incognito,omitempty"`  // nil / false
 }
 
 func buildBody(model, question string) string {
 	taskId := fmt.Sprintf("task:%s", uuid.New().String())
 	convId := fmt.Sprintf("conv:%s", uuid.New().String())
-	msg1Id := fmt.Sprintf("msg:%s", uuid.New().String())
-	msg2Id := fmt.Sprintf("msg:%s", uuid.New().String())
-	msg3Id := fmt.Sprintf("msg:%s", uuid.New().String())
+	msg1Id := fmt.Sprintf("msg:<%s>", uuid.New().String())
+	msg2Id := fmt.Sprintf("msg:<%s>", uuid.New().String())
+	msg3Id := fmt.Sprintf("msg:<%s>", uuid.New().String())
 	body := Body{
 		TaskUid: taskId,
 		BotUid:  "monica",
@@ -124,24 +80,21 @@ func buildBody(model, question string) string {
 					ItemType:       "reply",
 					Summary:        "__RENDER_BOT_WELCOME_MSG__",
 					Data: BodyDataItemData{
-						Type:         "text",
-						Content:      "__RENDER_BOT_WELCOME_MSG__",
-						QuoteContent: "",
-						MaxToken:     0,
-						IsIncognito:  false,
+						Type:    "text",
+						Content: "__RENDER_BOT_WELCOME_MSG__",
 					},
 				},
 				{
 					ItemId:         msg2Id,
 					ConversationId: convId,
 					ItemType:       "question",
-					Summary:        "",
+					ParentItemId:   msg1Id,
 					Data: BodyDataItemData{
 						Type:         "text",
 						Content:      question,
-						QuoteContent: "",
-						MaxToken:     0,
-						IsIncognito:  false,
+						QuoteContent: new(string),
+						MaxToken:     new(int),
+						IsIncognito:  new(bool),
 					},
 				},
 			},
@@ -152,7 +105,7 @@ func buildBody(model, question string) string {
 		ToolData:       struct{}{},
 		AiRespLanguage: "Chinese (Simplified)",
 	}
-	b, _ := json.MarshalIndent(body, "", "  ")
+	b, _ := utils.MarshalIndentNoEscape(body, "", "    ")
 	return string(b)
 }
 
@@ -179,7 +132,10 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
 
 	client := &http.Client{Transport: &http.Transport{
-		ForceAttemptHTTP2: false,
+		Proxy: http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
 	}}
 	var resp *http.Response
 	for i := 0; i < 3; i++ {
