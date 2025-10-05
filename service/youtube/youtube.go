@@ -8,7 +8,6 @@ import (
 	"github.com/lincaiyong/uniapi/utils"
 	"io"
 	"net/http"
-	"time"
 )
 
 type SubtitleText struct {
@@ -85,7 +84,6 @@ func requestTimedText(client *http.Client, trackBaseUrl string) (*Caption, error
 
 func DownloadAutoCaption(videoID string) (*Caption, error) {
 	client := &http.Client{
-		Timeout: time.Second * 10,
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 		},

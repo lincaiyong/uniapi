@@ -7,7 +7,6 @@ import (
 	"github.com/lincaiyong/uniapi/utils"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var gSpaceId, gModelName, gModelId, gPromptKey, gPromptPlatformSession string
@@ -72,7 +71,6 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	req.Header.Add("Agw-Js-Conv", "str")
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 		}}
