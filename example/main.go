@@ -6,6 +6,7 @@ import (
 	"github.com/lincaiyong/uniapi/service/baidupan"
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/fornext"
+	"github.com/lincaiyong/uniapi/service/googletrans"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
@@ -75,13 +76,29 @@ func baidupanExample() {
 	}
 }
 
+func googletransExample() {
+	text, err := googletrans.TranslateZhToEn("书籍是人类进步的阶梯。孤独是灵感的源泉。")
+	if err != nil {
+		fmt.Printf("fail to translate: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(text)
+	text, err = googletrans.TranslateEnToZh(text)
+	if err != nil {
+		fmt.Printf("fail to translate: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(text)
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
 		//os.Args[1] = "fornext"
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
-		os.Args[1] = "baidupan"
+		//os.Args[1] = "baidupan"
+		os.Args[1] = "googletrans"
 	}
 	service := os.Args[1]
 	switch service {
@@ -95,5 +112,7 @@ func main() {
 		youtubeExample()
 	case "baidupan":
 		baidupanExample()
+	case "googletrans":
+		googletransExample()
 	}
 }
