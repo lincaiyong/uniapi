@@ -6,5 +6,4 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lincaiyong/log v0.0.0-20250929160056-7d399ec7ee57
-	github.com/qjfoidnh/Baidu-Login v1.4.1
 )
