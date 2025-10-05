@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/monica"
+	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
 )
 
@@ -47,10 +49,21 @@ func edgettsExample() {
 	fmt.Println("saved to output.wav")
 }
 
+func youtubeExample() {
+	caption, err := youtube.DownloadAutoCaption("vStJoetOxJg")
+	if err != nil {
+		fmt.Printf("fail to download caption: %v\n", err)
+		os.Exit(1)
+	}
+	b, _ := json.MarshalIndent(caption, "", "  ")
+	fmt.Println(string(b))
+}
+
 func main() {
 	os.Args = []string{"x", "monica"}
-	//os.Args[1] = "fornext"
-	os.Args[1] = "edgetts"
+	os.Args[1] = "fornext"
+	//os.Args[1] = "edgetts"
+	//os.Args[1] = "youtube"
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: main <service>")
 		os.Exit(1)
@@ -63,5 +76,7 @@ func main() {
 		fornextExample()
 	case "edgetts":
 		edgettsExample()
+	case "youtube":
+		youtubeExample()
 	}
 }

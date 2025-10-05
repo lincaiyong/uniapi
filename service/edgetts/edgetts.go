@@ -34,7 +34,7 @@ func EdgeTTS(text string) ([]byte, error) {
 		"User-Agent": []string{userAgent},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail to connect to websocket server: %v", err)
+		return nil, fmt.Errorf("fail to connect to websocket server: %w", err)
 	}
 	defer func() { _ = conn.Close() }()
 	log.InfoLog("connected to websocket server")
@@ -59,7 +59,7 @@ Path:speech.config
 }`, timestamp1), "\n", "\r\n")
 	err = conn.WriteMessage(websocket.TextMessage, []byte(configMsg))
 	if err != nil {
-		return nil, fmt.Errorf("fail to send config message: %v", err)
+		return nil, fmt.Errorf("fail to send config message: %w", err)
 	}
 	log.InfoLog("sent config message")
 
@@ -79,14 +79,14 @@ Path:ssml
 		timestamp2, html.EscapeString(text)), "\n", "\r\n")
 	err = conn.WriteMessage(websocket.TextMessage, []byte(ssmlMsg))
 	if err != nil {
-		return nil, fmt.Errorf("fail to send ssml message: %v", err)
+		return nil, fmt.Errorf("fail to send ssml message: %w", err)
 	}
 	log.InfoLog("sent ssml message")
 	var audioData []byte
 	for {
 		messageType, message, readErr := conn.ReadMessage()
 		if readErr != nil {
-			return nil, fmt.Errorf("fail to read message: %v", err)
+			return nil, fmt.Errorf("fail to read message: %w", err)
 		}
 		if messageType == websocket.BinaryMessage {
 			log.InfoLog("receive binary message: %d bytes", len(message))

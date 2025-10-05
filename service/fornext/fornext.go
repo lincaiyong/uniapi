@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/lincaiyong/uniapi/utils"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var gSpaceId, gModelName, gModelId, gPromptKey, gPromptPlatformSession string
@@ -63,28 +65,20 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	body := buildBody(q)
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
-		return "", fmt.Errorf("fail to create request: %v", err)
+		return "", fmt.Errorf("fail to create request: %w", err)
 	}
 	req.Header.Add("Cookie", "prompt-platform-session="+gPromptPlatformSession)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Agw-Js-Conv", "str")
 
-	client := &http.Client{Transport: &http.Transport{
-		ForceAttemptHTTP2: false,
-		Proxy:             http.ProxyFromEnvironment,
-	}}
-	var resp *http.Response
-	for i := 0; i < 3; i++ {
-		resp, err = client.Do(req)
-		if err == nil {
-			break
-		}
-		if resp != nil {
-			_ = resp.Body.Close()
-		}
-	}
+	client := &http.Client{
+		Timeout: time.Second * 10,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		}}
+	resp, err := utils.ClientDoRetry(client, req, 3)
 	if err != nil {
-		return "", fmt.Errorf("fail to do client request: %v", err)
+		return "", fmt.Errorf("fail to do client request: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -101,7 +95,7 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 			}
 			err = json.Unmarshal([]byte(data), &chunk)
 			if err != nil {
-				return "", fmt.Errorf("fail to unmarshal chunk: %v", err)
+				return "", fmt.Errorf("fail to unmarshal chunk: %w", err)
 			}
 			f(chunk.Item.Content)
 			sb.WriteString(chunk.Item.Content)
@@ -111,7 +105,7 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	}
 	err = scanner.Err()
 	if err != nil {
-		return "", fmt.Errorf("fail to scan response body: %v", err)
+		return "", fmt.Errorf("fail to scan response body: %w", err)
 	}
 	return sb.String(), nil
 }

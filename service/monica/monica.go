@@ -2,13 +2,13 @@ package monica
 
 import (
 	"bufio"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/lincaiyong/uniapi/utils"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Body struct {
@@ -125,30 +125,20 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 	body := buildBody(gModel, q)
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
-		return "", fmt.Errorf("fail to create request: %v", err)
+		return "", fmt.Errorf("fail to create request: %w", err)
 	}
 	req.Header.Add("Cookie", "session_id="+gSessionId)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
 
-	client := &http.Client{Transport: &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}}
-	var resp *http.Response
-	for i := 0; i < 3; i++ {
-		resp, err = client.Do(req)
-		if err == nil {
-			break
-		}
-		if resp != nil {
-			_ = resp.Body.Close()
-		}
-	}
+	client := &http.Client{
+		Timeout: time.Second * 10,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		}}
+	resp, err := utils.ClientDoRetry(client, req, 3)
 	if err != nil {
-		return "", fmt.Errorf("fail to do client request: %v", err)
+		return "", fmt.Errorf("fail to do client request: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -168,10 +158,10 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 			}
 			err = json.Unmarshal([]byte(data), &chunk)
 			if err != nil {
-				return "", fmt.Errorf("fail to unmarshal json: %v", err)
+				return "", fmt.Errorf("fail to unmarshal json: %w", err)
 			}
 			if chunk.Error != nil {
-				return "", fmt.Errorf("get monica response with error: %v", chunk.Error)
+				return "", fmt.Errorf("get monica response with error: %w", chunk.Error)
 			}
 			f(chunk.Text)
 			sb.WriteString(chunk.Text)
@@ -182,14 +172,14 @@ func ChatCompletion(q string, f func(string)) (string, error) {
 			}
 			err = json.Unmarshal([]byte(line), &respBody)
 			if err != nil {
-				return "", fmt.Errorf("fail to unmarshal json: %v", err)
+				return "", fmt.Errorf("fail to unmarshal json: %w", err)
 			}
 			return "", fmt.Errorf("get monica response with error: %d, %s", respBody.Code, respBody.Msg)
 		}
 	}
 	err = scanner.Err()
 	if err != nil {
-		return "", fmt.Errorf("fail to scan body: %v", err)
+		return "", fmt.Errorf("fail to scan body: %w", err)
 	}
 	return sb.String(), nil
 }
