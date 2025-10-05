@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type ListDirItem struct {
@@ -16,6 +17,9 @@ type ListDirItem struct {
 }
 
 func listDir(dir string) ([]*ListDirItem, error) {
+	if !strings.HasPrefix(dir, "/") {
+		return nil, fmt.Errorf("invalid file path: %s, should start with \"/\"", dir)
+	}
 	dirQuoted := url.QueryEscape(dir)
 	panUrl := fmt.Sprintf("https://pan.baidu.com/api/list?app_id=250528&dir=%s&page=1&num=100", dirQuoted)
 	req, err := http.NewRequest("GET", panUrl, nil)

@@ -3,14 +3,15 @@ package baidupan
 import (
 	"errors"
 	"fmt"
+	"github.com/lincaiyong/log"
 	"path"
 )
 
 var gBdUss string
 var gSToken string
 
-func Init(bduss, stoken string) {
-	gBdUss = bduss
+func Init(bdUss, stoken string) {
+	gBdUss = bdUss
 	gSToken = stoken
 }
 
@@ -38,6 +39,7 @@ func getFileId(filePath string) (fileId int64, err error) {
 }
 
 func Download(filePath string) ([]byte, error) {
+	log.InfoLog("download file: %s", filePath)
 	if cookieValue() == "" {
 		return nil, fmt.Errorf("cookie is empty, should call Init() first")
 	}
@@ -45,17 +47,21 @@ func Download(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return downloadByFileId(fileId)
+	link, err := getDownloadLink(fileId)
+	if err != nil {
+		return nil, err
+	}
+	return downloadByLink(link)
 }
 
-func Upload(filePath string, content []byte) error {
-	if cookieValue() == "" {
-		return fmt.Errorf("cookie is empty, should call Init() first")
-	}
-	fileId, err := getFileId(filePath)
-	if err != nil && !errors.Is(err, fileNotFoundError) {
-		return err
-	}
-	
-	return nil
-}
+//func Upload(filePath string, content []byte) error {
+//	if cookieValue() == "" {
+//		return fmt.Errorf("cookie is empty, should call Init() first")
+//	}
+//	fileId, err := getFileId(filePath)
+//	if err != nil && !errors.Is(err, fileNotFoundError) {
+//		return err
+//	}
+//
+//	return nil
+//}

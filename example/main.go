@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/lincaiyong/uniapi/service/baidupan"
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/monica"
@@ -60,7 +61,13 @@ func youtubeExample() {
 }
 
 func baidupanExample() {
-
+	baidupan.Init(os.Getenv("BAIDU_PAN_BDUSS"), os.Getenv("BAIDU_PAN_STOKEN"))
+	b, err := baidupan.Download("/goodfun/test.txt")
+	if err != nil {
+		fmt.Printf("fail to download baidupan: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(b))
 }
 
 func main() {

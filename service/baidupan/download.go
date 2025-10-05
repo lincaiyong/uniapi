@@ -12,7 +12,7 @@ import (
 )
 
 func downloadByLink(url string) ([]byte, error) {
-	log.InfoLog("download link: %s", url)
+	log.InfoLog("download file by link: %s", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create request: %w", err)
@@ -91,11 +91,11 @@ func getSignTimestamp() (string, int, error) {
 	return sign, timestamp, nil
 }
 
-func downloadByFileId(fileId int64) ([]byte, error) {
-	log.InfoLog("download file by id: %d", fileId)
+func getDownloadLink(fileId int64) (string, error) {
+	log.InfoLog("get download link: %d", fileId)
 	sign, timestamp, err := getSignTimestamp()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	params := url.Values{}
 	params.Add("fidlist", fmt.Sprintf(`[%d]`, fileId))
@@ -104,24 +104,24 @@ func downloadByFileId(fileId int64) ([]byte, error) {
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/download?%s", params.Encode())
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create request: %v", err)
+		return "", fmt.Errorf("fail to create request: %v", err)
 	}
 	req.Header.Set("Cookie", cookieValue())
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("fail to do request: %v", err)
+		return "", fmt.Errorf("fail to do request: %v", err)
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected response code: %d, %s", resp.StatusCode, resp.Status)
+		return "", fmt.Errorf("unexpected response code: %d, %s", resp.StatusCode, resp.Status)
 	}
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("fail to read response body: %v", err)
+		return "", fmt.Errorf("fail to read response body: %v", err)
 	}
 	var respJson struct {
 		Errno        int `json:"errno"`
@@ -132,15 +132,15 @@ func downloadByFileId(fileId int64) ([]byte, error) {
 	}
 	err = json.Unmarshal(bs, &respJson)
 	if err != nil {
-		return nil, fmt.Errorf("fail to unmarshal response body: %v", err)
+		return "", fmt.Errorf("fail to unmarshal response body: %v", err)
 	}
 	if respJson.Errno != 0 {
-		return nil, fmt.Errorf("unexpected response errno: %d", respJson.Errno)
+		return "", fmt.Errorf("unexpected response errno: %d", respJson.Errno)
 	}
 	if len(respJson.DownloadLink) != 1 {
-		return nil, fmt.Errorf("unexpected dlink array size: %d", len(respJson.DownloadLink))
+		return "", fmt.Errorf("unexpected dlink array size: %d", len(respJson.DownloadLink))
 	}
 	link := respJson.DownloadLink[0].Link
 	link = strings.ReplaceAll(link, `\/`, "/")
-	return downloadByLink(link)
+	return link, nil
 }
