@@ -18,7 +18,11 @@ func downloadByLink(url string) ([]byte, error) {
 		return nil, fmt.Errorf("fail to create request: %w", err)
 	}
 	req.Header.Set("Cookie", cookieValue())
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to download url: %w", err)
@@ -45,7 +49,11 @@ func getTemplateVariable() (sign1, sign2 string, timestamp int, err error) {
 		return
 	}
 	req.Header.Set("Cookie", cookieValue())
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		err = fmt.Errorf("fail to do request: %w", err)
@@ -107,7 +115,11 @@ func getDownloadLink(fileId int64) (string, error) {
 		return "", fmt.Errorf("fail to create request: %v", err)
 	}
 	req.Header.Set("Cookie", cookieValue())
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("fail to do request: %v", err)

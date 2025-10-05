@@ -65,9 +65,14 @@ func baidupanExample() {
 	b, err := baidupan.Download("/goodfun/test.txt")
 	if err != nil {
 		fmt.Printf("fail to download baidupan: %v\n", err)
-		os.Exit(1)
+		b = []byte("hello world")
 	}
 	fmt.Println(string(b))
+	err = baidupan.Upload("/goodfun/test.txt", b)
+	if err != nil {
+		fmt.Printf("fail to upload baidupan: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func main() {

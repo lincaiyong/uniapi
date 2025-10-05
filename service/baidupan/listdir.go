@@ -27,7 +27,11 @@ func listDir(dir string) ([]*ListDirItem, error) {
 		return nil, fmt.Errorf("fail to create request: %w", err)
 	}
 	req.Header.Set("Cookie", cookieValue())
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to download url: %w", err)

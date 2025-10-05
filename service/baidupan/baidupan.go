@@ -54,14 +54,30 @@ func Download(filePath string) ([]byte, error) {
 	return downloadByLink(link)
 }
 
-//func Upload(filePath string, content []byte) error {
-//	if cookieValue() == "" {
-//		return fmt.Errorf("cookie is empty, should call Init() first")
-//	}
-//	fileId, err := getFileId(filePath)
-//	if err != nil && !errors.Is(err, fileNotFoundError) {
-//		return err
-//	}
-//
-//	return nil
-//}
+func Upload(filePath string, content []byte) error {
+	log.InfoLog("upload file: %s", filePath)
+	if cookieValue() == "" {
+		return fmt.Errorf("cookie is empty, should call Init() first")
+	}
+	_, err := getFileId(filePath)
+	if err == nil || !errors.Is(err, fileNotFoundError) {
+		log.InfoLog("upload file: %s already exists, delete it", filePath)
+		err = deleteFile(filePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	size := len(content)
+	hash := calcMd5(content)
+	uploadId, err := uploadPreCreate(filePath, hash)
+	if err != nil {
+		return err
+	}
+	err = uploadSuperFile(filePath, uploadId, content)
+	if err != nil {
+		return err
+	}
+	err = uploadCreate(filePath, uploadId, hash, size)
+	return err
+}
