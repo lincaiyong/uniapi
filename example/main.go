@@ -59,14 +59,17 @@ func youtubeExample() {
 	fmt.Println(string(b))
 }
 
+func baidupanExample() {
+
+}
+
 func main() {
-	os.Args = []string{"x", "monica"}
-	//os.Args[1] = "fornext"
-	//os.Args[1] = "edgetts"
-	//os.Args[1] = "youtube"
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: main <service>")
-		os.Exit(1)
+		os.Args = []string{"x", "monica"}
+		//os.Args[1] = "fornext"
+		//os.Args[1] = "edgetts"
+		//os.Args[1] = "youtube"
+		os.Args[1] = "baidupan"
 	}
 	service := os.Args[1]
 	switch service {
@@ -78,5 +81,7 @@ func main() {
 		edgettsExample()
 	case "youtube":
 		youtubeExample()
+	case "baidupan":
+		baidupanExample()
 	}
 }
