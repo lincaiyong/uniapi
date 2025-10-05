@@ -2,6 +2,7 @@ package monica
 
 // https://platform.monica.im/docs/en/models-and-pricing
 
+const ModelClaude45Sonnet = "claude-sonnet-4-5"          // ?
 const ModelClaude4Opus = "claude-opus-4-20250514"        // 15/75
 const ModelClaude4Sonnet = "claude-sonnet-4-20250514"    // 3/15
 const ModelClaude37Sonnet = "claude-3-7-sonnet-latest"   // 3/15

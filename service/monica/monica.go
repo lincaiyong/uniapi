@@ -67,7 +67,7 @@ func buildBody(model, question string) string {
 			PreGeneratedReplyId: msg3Id,
 			PreParentItemId:     msg2Id,
 			Origin:              "https://monica.im/home/chat/Monica/monica",
-			OriginPageTitle:     "New Chat",
+			OriginPageTitle:     fmt.Sprintf("New Chat (%s)", model),
 			TriggerBy:           "auto",
 			UseModel:            model,
 			IsIncognito:         false,

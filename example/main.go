@@ -11,8 +11,8 @@ import (
 )
 
 func monicaExample() {
-	monica.Init(monica.ModelClaude4Sonnet, os.Getenv("MONICA_SESSION_ID"))
-	_, err := monica.ChatCompletion("131加412", func(s string) {
+	monica.Init(monica.ModelGPT4oMini, os.Getenv("MONICA_SESSION_ID"))
+	_, err := monica.ChatCompletion("131加412，春眠不觉晓，", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -61,7 +61,7 @@ func youtubeExample() {
 
 func main() {
 	os.Args = []string{"x", "monica"}
-	os.Args[1] = "fornext"
+	//os.Args[1] = "fornext"
 	//os.Args[1] = "edgetts"
 	//os.Args[1] = "youtube"
 	if len(os.Args) < 2 {
