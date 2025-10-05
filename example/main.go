@@ -12,8 +12,8 @@ import (
 )
 
 func monicaExample() {
-	monica.Init(monica.ModelGPT4oMini, os.Getenv("MONICA_SESSION_ID"))
-	_, err := monica.ChatCompletion("131加412，春眠不觉晓，", func(s string) {
+	monica.Init(os.Getenv("MONICA_SESSION_ID"))
+	_, err := monica.ChatCompletion(monica.ModelGPT4oMini, "131加412，春眠不觉晓，", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
