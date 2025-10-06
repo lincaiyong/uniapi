@@ -7,6 +7,7 @@ import (
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/googletrans"
+	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
@@ -91,6 +92,15 @@ func googletransExample() {
 	fmt.Println(text)
 }
 
+func larkbotExample() {
+	larkbot.Init(os.Getenv("LARK_APP_ID"), os.Getenv("LARK_APP_SECRET"), os.Getenv("LARK_RECEIVE_ID"))
+	err := larkbot.Send("hello")
+	if err != nil {
+		fmt.Printf("fail to send: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
@@ -98,7 +108,8 @@ func main() {
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
 		//os.Args[1] = "baidupan"
-		os.Args[1] = "googletrans"
+		//os.Args[1] = "googletrans"
+		os.Args[1] = "larkbot"
 	}
 	service := os.Args[1]
 	switch service {
@@ -114,5 +125,7 @@ func main() {
 		baidupanExample()
 	case "googletrans":
 		googletransExample()
+	case "larkbot":
+		larkbotExample()
 	}
 }
