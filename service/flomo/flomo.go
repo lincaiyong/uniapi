@@ -29,10 +29,10 @@ func Init(token string) {
 	gToken = token
 }
 
-func UpdatedMemo(latestUpdatedAt time.Time) ([]*Memo, error) {
+func UpdatedMemo(slug string, latestUpdatedAt time.Time) ([]*Memo, error) {
 	ret := make([]*Memo, 0)
 	limit := 200
-	memos, err := updatedMemoByPage(latestUpdatedAt, "", limit)
+	memos, err := updatedMemoByPage(latestUpdatedAt, slug, limit)
 	if err != nil {
 		return nil, err
 	}
