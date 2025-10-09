@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"github.com/lincaiyong/uniapi/service/baidupan"
 	"github.com/lincaiyong/uniapi/service/edgetts"
+	"github.com/lincaiyong/uniapi/service/flomo"
 	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/googletrans"
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
+	"time"
 )
 
 func monicaExample() {
@@ -101,6 +103,16 @@ func larkbotExample() {
 	}
 }
 
+func flomoExample() {
+	flomo.Init(os.Getenv("FLOMO_AUTH_TOKEN"))
+	memos, err := flomo.UpdatedMemo(time.Unix(1759969211, 0))
+	if err != nil {
+		fmt.Printf("fail to get memos: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(memos)
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
@@ -109,7 +121,8 @@ func main() {
 		//os.Args[1] = "youtube"
 		//os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
-		os.Args[1] = "larkbot"
+		//os.Args[1] = "larkbot"
+		os.Args[1] = "flomo"
 	}
 	service := os.Args[1]
 	switch service {
@@ -127,5 +140,7 @@ func main() {
 		googletransExample()
 	case "larkbot":
 		larkbotExample()
+	case "flomo":
+		flomoExample()
 	}
 }
