@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"github.com/lincaiyong/log"
 	"github.com/lincaiyong/uniapi/utils"
 	"io"
 	"net/http"
@@ -29,12 +30,31 @@ func Init(token string) {
 }
 
 func UpdatedMemo(latestUpdatedAt time.Time) ([]*Memo, error) {
+	ret := make([]*Memo, 0)
+	limit := 200
+	memos, err := updatedMemoByPage(latestUpdatedAt, "", limit)
+	if err != nil {
+		return nil, err
+	}
+	ret = append(ret, memos...)
+	for len(memos) == limit {
+		lastMemo := memos[len(memos)-1]
+		memos, err = updatedMemoByPage(lastMemo.UpdatedAt, lastMemo.Slug, limit)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, memos...)
+	}
+	return ret, nil
+}
+
+func updatedMemoByPage(latestUpdatedAt time.Time, slug string, limit int) ([]*Memo, error) {
 	baseURL := "https://flomoapp.com/api/v1/memo/updated/"
 
 	n := map[string]string{
-		"limit":             "200",
-		"latest_updated_at": strconv.Itoa(int(latestUpdatedAt.Unix())),
-		"latest_slug":       "",
+		"limit":             strconv.Itoa(limit),
+		"latest_updated_at": strconv.Itoa(int(latestUpdatedAt.UTC().Unix())),
+		"latest_slug":       slug,
 		"tz":                "8:0",
 		"timestamp":         strconv.Itoa(int(time.Now().Unix())),
 		"api_key":           "flomo_web",
@@ -55,6 +75,7 @@ func UpdatedMemo(latestUpdatedAt time.Time) ([]*Memo, error) {
 	params.Add("webp", n["webp"])
 	params.Add("sign", sign)
 	fullURL := baseURL + "?" + params.Encode()
+	log.InfoLog(fullURL)
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -109,25 +130,20 @@ func UpdatedMemo(latestUpdatedAt time.Time) ([]*Memo, error) {
 	}
 	ret := make([]*Memo, 0, len(respData.Data))
 	for _, data := range respData.Data {
+		createdAt, _ := time.ParseInLocation(time.DateTime, data.CreatedAt, time.Local)
+		updatedAt, _ := time.ParseInLocation(time.DateTime, data.UpdatedAt, time.Local)
 		ret = append(ret, &Memo{
-			Slug:    data.Slug,
-			Content: data.Content,
-			//CreatedAt: time.ParseInLocation() data.CreatedAt,
-			//UpdatedAt: data.UpdatedAt,
-			Tags: data.Tags,
+			Slug:      data.Slug,
+			Content:   data.Content,
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
+			Tags:      data.Tags,
 		})
 	}
 	return ret, nil
 }
 
 func getSign(e map[string]string) string {
-	// 	n := map[string]string{
-	//		"timestamp":   "1759939307",
-	//		"api_key":     "flomo_web",
-	//		"app_version": "4.0",
-	//		"platform":    "web",
-	//		"webp":        "1",
-	//	}
 	keys := make([]string, 0, len(e))
 	for k := range e {
 		keys = append(keys, k)
