@@ -101,6 +101,11 @@ func larkbotExample() {
 		fmt.Printf("fail to send: %v\n", err)
 		os.Exit(1)
 	}
+	err = larkbot.SendTo("hello", "oc_ed80a3de8e524657faf5dafa847838f2")
+	if err != nil {
+		fmt.Printf("fail to send: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func flomoExample() {
@@ -121,8 +126,8 @@ func main() {
 		//os.Args[1] = "youtube"
 		//os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
-		//os.Args[1] = "larkbot"
-		os.Args[1] = "flomo"
+		os.Args[1] = "larkbot"
+		//os.Args[1] = "flomo"
 	}
 	service := os.Args[1]
 	switch service {

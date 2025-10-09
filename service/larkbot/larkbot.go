@@ -45,3 +45,30 @@ func Send(msg string) error {
 	}
 	return nil
 }
+
+func SendTo(msg, chatId string) error {
+	if gAppId == "" || gAppSecret == "" {
+		return fmt.Errorf("app id or app secret or receive id is empty, call Init() first")
+	}
+	client := lark.NewClient(gAppId, gAppSecret)
+	b, _ := json.Marshal(map[string]string{
+		"text": msg,
+	})
+	content := string(b)
+	req := larkim.NewCreateMessageReqBuilder().
+		ReceiveIdType(`chat_id`).
+		Body(larkim.NewCreateMessageReqBodyBuilder().
+			ReceiveId(chatId).
+			MsgType(`text`).
+			Content(content).
+			Build()).
+		Build()
+	resp, err := client.Im.V1.Message.Create(context.Background(), req)
+	if err != nil {
+		return fmt.Errorf("fail to create message: %v", err)
+	}
+	if !resp.Success() {
+		return fmt.Errorf("unexpected response: %s", larkcore.Prettify(resp.CodeError))
+	}
+	return nil
+}
