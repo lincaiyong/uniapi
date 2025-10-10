@@ -10,6 +10,7 @@ import (
 	"github.com/lincaiyong/uniapi/service/googletrans"
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
+	"github.com/lincaiyong/uniapi/service/mysql"
 	"github.com/lincaiyong/uniapi/service/object"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
@@ -134,6 +135,38 @@ func objectExample() {
 	fmt.Println(string(b))
 }
 
+func mysqlExample() {
+	type DemoUser struct {
+		ID   int    `gorm:"primaryKey;autoIncrement" json:"id"`
+		Name string `gorm:"type:varchar(255);not null" json:"name"`
+		Age  int    `gorm:"not null" json:"age"`
+	}
+	mysql.Init(os.Getenv("DATABASE_DSN"), &DemoUser{})
+	mysql.SetTraceFn(func(sql string) {
+		fmt.Println(sql)
+	})
+	db, err := mysql.Connect()
+	if err != nil {
+		fmt.Printf("fail to connect to mysql: %v\n", err)
+		os.Exit(1)
+	}
+	r := db.Create(&DemoUser{
+		Name: "andy",
+		Age:  20,
+	})
+	if r.Error != nil {
+		fmt.Printf("fail to create demo user: %v\n", r.Error)
+		os.Exit(1)
+	}
+	var user DemoUser
+	r = db.Model(&DemoUser{}).Where("age = ?", 20).First(&user)
+	if r.Error != nil {
+		fmt.Printf("fail to get demo user: %v\n", r.Error)
+		os.Exit(1)
+	}
+	fmt.Println(user)
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
@@ -144,7 +177,8 @@ func main() {
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
 		//os.Args[1] = "flomo"
-		os.Args[1] = "object"
+		//os.Args[1] = "object"
+		os.Args[1] = "mysql"
 	}
 	service := os.Args[1]
 	switch service {
@@ -166,5 +200,7 @@ func main() {
 		flomoExample()
 	case "object":
 		objectExample()
+	case "mysql":
+		mysqlExample()
 	}
 }
