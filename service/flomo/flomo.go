@@ -20,6 +20,7 @@ type Memo struct {
 	Content   string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	DeletedAt time.Time
 	Tags      []string
 }
 
@@ -132,11 +133,13 @@ func updatedMemoByPage(latestUpdatedAt time.Time, slug string, limit int) ([]*Me
 	for _, data := range respData.Data {
 		createdAt, _ := time.ParseInLocation(time.DateTime, data.CreatedAt, time.Local)
 		updatedAt, _ := time.ParseInLocation(time.DateTime, data.UpdatedAt, time.Local)
+		deletedAt, _ := time.ParseInLocation(time.DateTime, data.DeletedAt, time.Local)
 		ret = append(ret, &Memo{
 			Slug:      data.Slug,
 			Content:   data.Content,
 			CreatedAt: createdAt,
 			UpdatedAt: updatedAt,
+			DeletedAt: deletedAt,
 			Tags:      data.Tags,
 		})
 	}

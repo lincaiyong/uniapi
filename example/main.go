@@ -110,7 +110,7 @@ func larkbotExample() {
 
 func flomoExample() {
 	flomo.Init(os.Getenv("FLOMO_AUTH_TOKEN"))
-	memos, err := flomo.UpdatedMemo("", time.Unix(0, 0))
+	memos, err := flomo.UpdatedMemo("", time.Now().Add(-1*time.Hour))
 	if err != nil {
 		fmt.Printf("fail to get memos: %v\n", err)
 		os.Exit(1)
