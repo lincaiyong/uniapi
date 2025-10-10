@@ -33,6 +33,8 @@ func (l *Logger) Error(_ context.Context, s string, i ...interface{}) {
 }
 
 func (l *Logger) Trace(_ context.Context, _ time.Time, f func() (sql string, rowsAffected int64), _ error) {
-	sql, _ := f()
-	traceFn(sql)
+	if traceFn != nil {
+		sql, _ := f()
+		traceFn(sql)
+	}
 }

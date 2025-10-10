@@ -16,7 +16,7 @@ func Init(objectServerUrl, objectServerToken string) {
 	gObjectServerToken = objectServerToken
 }
 
-func PutObject(data []byte) (string, error) {
+func Put(data []byte) (string, error) {
 	if gObjectServerUrl == "" || gObjectServerToken == "" {
 		return "", fmt.Errorf("object server url or token is empty")
 	}
@@ -60,7 +60,7 @@ func PutObject(data []byte) (string, error) {
 	return string(b), nil
 }
 
-func GetObject(sha1 string) ([]byte, error) {
+func Get(sha1 string) ([]byte, error) {
 	if gObjectServerUrl == "" || gObjectServerToken == "" {
 		return nil, fmt.Errorf("object server url or token is empty")
 	}

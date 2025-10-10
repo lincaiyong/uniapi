@@ -122,12 +122,12 @@ func flomoExample() {
 
 func objectExample() {
 	object.Init(os.Getenv("OBJECT_SERVER_URL"), os.Getenv("OBJECT_SERVER_TOKEN"))
-	hash, err := object.PutObject([]byte("hello"))
+	hash, err := object.Put([]byte("hello"))
 	if err != nil {
 		fmt.Printf("fail to put object: %v\n", err)
 		os.Exit(1)
 	}
-	b, err := object.GetObject(hash)
+	b, err := object.Get(hash)
 	if err != nil {
 		fmt.Printf("fail to get object: %v\n", err)
 		os.Exit(1)
