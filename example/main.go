@@ -10,6 +10,7 @@ import (
 	"github.com/lincaiyong/uniapi/service/googletrans"
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
+	"github.com/lincaiyong/uniapi/service/object"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
 	"time"
@@ -118,6 +119,21 @@ func flomoExample() {
 	fmt.Println(memos)
 }
 
+func objectExample() {
+	object.Init(os.Getenv("OBJECT_SERVER_URL"), os.Getenv("OBJECT_SERVER_TOKEN"))
+	hash, err := object.PutObject([]byte("hello"))
+	if err != nil {
+		fmt.Printf("fail to put object: %v\n", err)
+		os.Exit(1)
+	}
+	b, err := object.GetObject(hash)
+	if err != nil {
+		fmt.Printf("fail to get object: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(b))
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
@@ -127,7 +143,8 @@ func main() {
 		//os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
-		os.Args[1] = "flomo"
+		//os.Args[1] = "flomo"
+		os.Args[1] = "object"
 	}
 	service := os.Args[1]
 	switch service {
@@ -147,5 +164,7 @@ func main() {
 		larkbotExample()
 	case "flomo":
 		flomoExample()
+	case "object":
+		objectExample()
 	}
 }
