@@ -39,3 +39,9 @@ func GetObject(hash string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+func HasObject(hash string) bool {
+	filePath := pathOf(hash)
+	_, err := GetFileId(filePath)
+	return err == nil
+}
