@@ -21,7 +21,7 @@ func pathOf(sha1 string) string {
 func PutObject(data []byte) (string, error) {
 	hash := sha1Of(data)
 	filePath := pathOf(hash)
-	_, err := Download(filePath)
+	_, err := GetFileId(filePath)
 	if err != nil {
 		err = Upload(filePath, data)
 		if err != nil {
