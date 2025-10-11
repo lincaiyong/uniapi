@@ -108,7 +108,7 @@ func uploadPreCreate(savePath, md5 string) (string, error) {
 }
 
 func uploadCreate(savePath, uploadId, md5 string, size int) error {
-	log.InfoLog("pre create: %s, %s", savePath, md5)
+	log.InfoLog("upload create: %s, %s", savePath, md5)
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/create?isdir=0&app_id=250528&channel=chunlei&web=1&clienttype=0")
 	formData := url.Values{}
 	formData.Set("path", savePath)
