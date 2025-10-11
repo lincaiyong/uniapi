@@ -67,23 +67,23 @@ func youtubeExample() {
 
 func baidupanExample() {
 	baidupan.Init(os.Getenv("BAIDU_PAN_BDUSS"), os.Getenv("BAIDU_PAN_STOKEN"))
-	b, err := baidupan.Download("/goodfun/test.txt")
-	if err != nil {
-		fmt.Printf("fail to download baidupan: %v\n", err)
-		b = []byte("hello world")
-	}
-	fmt.Println(string(b))
-	err = baidupan.Upload("/goodfun/test.txt", b)
-	if err != nil {
-		fmt.Printf("fail to upload baidupan: %v\n", err)
-		os.Exit(1)
-	}
-	hash, err := baidupan.PutObject([]byte("hello world"))
+	//b, err := baidupan.Download("/goodfun/test.txt")
+	//if err != nil {
+	//	fmt.Printf("fail to download baidupan: %v\n", err)
+	//	b = []byte("hello world")
+	//}
+	//fmt.Println(string(b))
+	//err = baidupan.Upload("/goodfun/test.txt", b)
+	//if err != nil {
+	//	fmt.Printf("fail to upload baidupan: %v\n", err)
+	//	os.Exit(1)
+	//}
+	hash, err := baidupan.PutObject([]byte("hello world?"))
 	if err != nil {
 		fmt.Printf("fail to put baidupan: %v\n", err)
 		os.Exit(1)
 	}
-	b, err = baidupan.GetObject(hash)
+	b, err := baidupan.GetObject(hash)
 	if err != nil {
 		fmt.Printf("fail to get baidupan: %v\n", err)
 		os.Exit(1)

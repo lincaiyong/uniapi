@@ -14,8 +14,7 @@ func sha1Of(b []byte) string {
 }
 
 func pathOf(sha1 string) string {
-	// <object_dir>/sha1[0:2]/sha1[2:4]/sha1[4:]
-	return path.Join("/object", sha1[:2], sha1[2:4], sha1[4:])
+	return path.Join("/object", sha1[:2], sha1[2:4], sha1[4:6], sha1[6:8], sha1[8:])
 }
 
 func PutObject(data []byte) (string, error) {

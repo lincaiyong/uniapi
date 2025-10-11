@@ -1,7 +1,6 @@
 package baidupan
 
 import (
-	"errors"
 	"fmt"
 	"github.com/lincaiyong/log"
 	"path"
@@ -22,8 +21,6 @@ func cookieValue() string {
 	return fmt.Sprintf("BDUSS=%s; STOKEN=%s", gBdUss, gSToken)
 }
 
-var fileNotFoundError = errors.New("file not found")
-
 func GetFileId(filePath string) (fileId int64, err error) {
 	dirPath := path.Dir(filePath)
 	items, err := listDir(dirPath)
@@ -35,7 +32,7 @@ func GetFileId(filePath string) (fileId int64, err error) {
 			return item.FsId, nil
 		}
 	}
-	return 0, fileNotFoundError
+	return 0, fmt.Errorf("file not exists")
 }
 
 func Download(filePath string) ([]byte, error) {
@@ -60,7 +57,7 @@ func Upload(filePath string, content []byte) error {
 		return fmt.Errorf("cookie is empty, should call Init() first")
 	}
 	_, err := GetFileId(filePath)
-	if err == nil || !errors.Is(err, fileNotFoundError) {
+	if err == nil {
 		log.InfoLog("upload file: %s already exists, delete it", filePath)
 		err = deleteFile(filePath)
 		if err != nil {
