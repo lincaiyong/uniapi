@@ -79,6 +79,17 @@ func baidupanExample() {
 		fmt.Printf("fail to upload baidupan: %v\n", err)
 		os.Exit(1)
 	}
+	hash, err := baidupan.PutObject([]byte("hello world"))
+	if err != nil {
+		fmt.Printf("fail to put baidupan: %v\n", err)
+		os.Exit(1)
+	}
+	b, err = baidupan.GetObject(hash)
+	if err != nil {
+		fmt.Printf("fail to get baidupan: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(b))
 }
 
 func googletransExample() {
@@ -173,12 +184,12 @@ func main() {
 		//os.Args[1] = "fornext"
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
-		//os.Args[1] = "baidupan"
+		os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
 		//os.Args[1] = "flomo"
 		//os.Args[1] = "object"
-		os.Args[1] = "mysql"
+		//os.Args[1] = "mysql"
 	}
 	service := os.Args[1]
 	switch service {
