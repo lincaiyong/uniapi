@@ -11,7 +11,6 @@ import (
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"github.com/lincaiyong/uniapi/service/mysql"
-	"github.com/lincaiyong/uniapi/service/object"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
 	"time"
@@ -131,21 +130,6 @@ func flomoExample() {
 	fmt.Println(memos)
 }
 
-func objectExample() {
-	object.Init(os.Getenv("OBJECT_SERVER_URL"), os.Getenv("OBJECT_SERVER_TOKEN"))
-	hash, err := object.Put([]byte("hello"))
-	if err != nil {
-		fmt.Printf("fail to put object: %v\n", err)
-		os.Exit(1)
-	}
-	b, err := object.Get(hash)
-	if err != nil {
-		fmt.Printf("fail to get object: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(b))
-}
-
 func mysqlExample() {
 	type DemoUser struct {
 		ID   int    `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -209,8 +193,6 @@ func main() {
 		larkbotExample()
 	case "flomo":
 		flomoExample()
-	case "object":
-		objectExample()
 	case "mysql":
 		mysqlExample()
 	}
