@@ -24,7 +24,7 @@ func cookieValue() string {
 
 var fileNotFoundError = errors.New("file not found")
 
-func getFileId(filePath string) (fileId int64, err error) {
+func GetFileId(filePath string) (fileId int64, err error) {
 	dirPath := path.Dir(filePath)
 	items, err := listDir(dirPath)
 	if err != nil {
@@ -43,7 +43,7 @@ func Download(filePath string) ([]byte, error) {
 	if cookieValue() == "" {
 		return nil, fmt.Errorf("cookie is empty, should call Init() first")
 	}
-	fileId, err := getFileId(filePath)
+	fileId, err := GetFileId(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func Upload(filePath string, content []byte) error {
 	if cookieValue() == "" {
 		return fmt.Errorf("cookie is empty, should call Init() first")
 	}
-	_, err := getFileId(filePath)
+	_, err := GetFileId(filePath)
 	if err == nil || !errors.Is(err, fileNotFoundError) {
 		log.InfoLog("upload file: %s already exists, delete it", filePath)
 		err = deleteFile(filePath)
