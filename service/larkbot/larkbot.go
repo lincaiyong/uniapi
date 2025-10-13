@@ -19,7 +19,7 @@ func Init(appId, appSecret, receiveId string) {
 	gReceiveId = receiveId
 }
 
-func Send(msg string) error {
+func Send(ctx context.Context, msg string) error {
 	if gAppId == "" || gAppSecret == "" || gReceiveId == "" {
 		return fmt.Errorf("app id or app secret or receive id is empty, call Init() first")
 	}
@@ -36,7 +36,7 @@ func Send(msg string) error {
 			Content(content).
 			Build()).
 		Build()
-	resp, err := client.Im.V1.Message.Create(context.Background(), req)
+	resp, err := client.Im.V1.Message.Create(ctx, req)
 	if err != nil {
 		return fmt.Errorf("fail to create message: %v", err)
 	}
@@ -46,7 +46,7 @@ func Send(msg string) error {
 	return nil
 }
 
-func SendTo(msg, chatId string) error {
+func SendTo(ctx context.Context, msg, chatId string) error {
 	if gAppId == "" || gAppSecret == "" {
 		return fmt.Errorf("app id or app secret or receive id is empty, call Init() first")
 	}
@@ -63,7 +63,7 @@ func SendTo(msg, chatId string) error {
 			Content(content).
 			Build()).
 		Build()
-	resp, err := client.Im.V1.Message.Create(context.Background(), req)
+	resp, err := client.Im.V1.Message.Create(ctx, req)
 	if err != nil {
 		return fmt.Errorf("fail to create message: %v", err)
 	}

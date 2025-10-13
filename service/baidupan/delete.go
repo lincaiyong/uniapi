@@ -1,6 +1,7 @@
 package baidupan
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/lincaiyong/uniapi/utils"
@@ -11,15 +12,15 @@ import (
 	"time"
 )
 
-func deleteFile(filePath string) error {
-	taskId, err := createDeleteFileTask(filePath)
+func deleteFile(ctx context.Context, filePath string) error {
+	taskId, err := createDeleteFileTask(ctx, filePath)
 	if err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 
 	for i := 0; i < 10; i++ {
 		var done bool
-		done, err = queryDeleteTaskStatus(taskId)
+		done, err = queryDeleteTaskStatus(ctx, taskId)
 		if err != nil {
 			return fmt.Errorf("query task failed: %w", err)
 		}
@@ -31,11 +32,11 @@ func deleteFile(filePath string) error {
 	return fmt.Errorf("delete task timeout")
 }
 
-func createDeleteFileTask(filePath string) (int64, error) {
+func createDeleteFileTask(ctx context.Context, filePath string) (int64, error) {
 	reqUrl := fmt.Sprintf("https://pan.baidu.com/api/filemanager?async=2&onnest=fail&opera=delete&bdstoken=%s&newVerify=1&clienttype=0&app_id=250528&web=1", gSToken)
 	data := url.Values{}
 	data.Set("filelist", fmt.Sprintf(`["%s"]`, filePath))
-	req, err := http.NewRequest("POST", reqUrl, strings.NewReader(data.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", reqUrl, strings.NewReader(data.Encode()))
 	if err != nil {
 		return 0, fmt.Errorf("fail to create request: %w", err)
 	}
@@ -74,9 +75,9 @@ func createDeleteFileTask(filePath string) (int64, error) {
 	return deleteResp.TaskID, nil
 }
 
-func queryDeleteTaskStatus(taskID int64) (bool, error) {
+func queryDeleteTaskStatus(ctx context.Context, taskID int64) (bool, error) {
 	reqUrl := fmt.Sprintf("https://pan.baidu.com/share/taskquery?taskid=%d", taskID)
-	req, err := http.NewRequest("GET", reqUrl, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", reqUrl, nil)
 	if err != nil {
 		return false, fmt.Errorf("fail to create request: %w", err)
 	}

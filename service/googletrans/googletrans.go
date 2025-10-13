@@ -1,6 +1,7 @@
 package googletrans
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,23 +12,23 @@ import (
 	"strings"
 )
 
-func TranslateEnToZh(text string) (string, error) {
-	ret, err := translate(text, "en", "zh")
+func TranslateEnToZh(ctx context.Context, text string) (string, error) {
+	ret, err := translate(ctx, text, "en", "zh")
 	if err != nil {
 		return "", err
 	}
 	return ret, nil
 }
 
-func TranslateZhToEn(text string) (string, error) {
-	ret, err := translate(text, "zh", "en")
+func TranslateZhToEn(ctx context.Context, text string) (string, error) {
+	ret, err := translate(ctx, text, "zh", "en")
 	if err != nil {
 		return "", err
 	}
 	return ret, nil
 }
 
-func translate(text, sourceLang, targetLang string) (string, error) {
+func translate(ctx context.Context, text, sourceLang, targetLang string) (string, error) {
 	if text == "" {
 		return "", errors.New("empty text")
 	}
@@ -57,7 +58,7 @@ func translate(text, sourceLang, targetLang string) (string, error) {
 	params.Set("tk", "xxxx")
 	params.Set("q", text)
 	fullURL := baseURL + "?" + params.Encode()
-	req, err := http.NewRequest("GET", fullURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}

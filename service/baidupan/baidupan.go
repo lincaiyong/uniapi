@@ -1,6 +1,7 @@
 package baidupan
 
 import (
+	"context"
 	"fmt"
 	"github.com/lincaiyong/log"
 	"path"
@@ -21,9 +22,9 @@ func cookieValue() string {
 	return fmt.Sprintf("BDUSS=%s; STOKEN=%s", gBdUss, gSToken)
 }
 
-func GetFileId(filePath string) (fileId int64, err error) {
+func GetFileId(ctx context.Context, filePath string) (fileId int64, err error) {
 	dirPath := path.Dir(filePath)
-	items, err := listDir(dirPath)
+	items, err := listDir(ctx, dirPath)
 	if err != nil {
 		return 0, fmt.Errorf("fail to list dir, %w", err)
 	}
@@ -35,31 +36,31 @@ func GetFileId(filePath string) (fileId int64, err error) {
 	return 0, fmt.Errorf("file not exists")
 }
 
-func Download(filePath string) ([]byte, error) {
+func Download(ctx context.Context, filePath string) ([]byte, error) {
 	log.InfoLog("download file: %s", filePath)
 	if cookieValue() == "" {
 		return nil, fmt.Errorf("cookie is empty, should call Init() first")
 	}
-	fileId, err := GetFileId(filePath)
+	fileId, err := GetFileId(ctx, filePath)
 	if err != nil {
 		return nil, err
 	}
-	link, err := getDownloadLink(fileId)
+	link, err := getDownloadLink(ctx, fileId)
 	if err != nil {
 		return nil, err
 	}
-	return downloadByLink(link)
+	return downloadByLink(ctx, link)
 }
 
-func Upload(filePath string, content []byte) error {
+func Upload(ctx context.Context, filePath string, content []byte) error {
 	log.InfoLog("upload file: %s", filePath)
 	if cookieValue() == "" {
 		return fmt.Errorf("cookie is empty, should call Init() first")
 	}
-	_, err := GetFileId(filePath)
+	_, err := GetFileId(ctx, filePath)
 	if err == nil {
 		log.InfoLog("upload file: %s already exists, delete it", filePath)
-		err = deleteFile(filePath)
+		err = deleteFile(ctx, filePath)
 		if err != nil {
 			return err
 		}
@@ -67,14 +68,14 @@ func Upload(filePath string, content []byte) error {
 
 	size := len(content)
 	hash := calcMd5(content)
-	uploadId, err := uploadPreCreate(filePath, hash)
+	uploadId, err := uploadPreCreate(ctx, filePath, hash)
 	if err != nil {
 		return err
 	}
-	err = uploadSuperFile(filePath, uploadId, content)
+	err = uploadSuperFile(ctx, filePath, uploadId, content)
 	if err != nil {
 		return err
 	}
-	err = uploadCreate(filePath, uploadId, hash, size)
+	err = uploadCreate(ctx, filePath, uploadId, hash, size)
 	return err
 }

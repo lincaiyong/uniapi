@@ -2,6 +2,7 @@ package monica
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
@@ -114,14 +115,14 @@ func Init(sessionId string) {
 	gSessionId = sessionId
 }
 
-func ChatCompletion(model, q string, f func(string)) (string, error) {
+func ChatCompletion(ctx context.Context, model, q string, f func(string)) (string, error) {
 	if gSessionId == "" {
 		return "", fmt.Errorf("gSessionId is empty, call Init() first")
 	}
 
 	url := "https://api.monica.im/api/custom_bot/chat"
 	body := buildBody(model, q)
-	req, err := http.NewRequest("POST", url, strings.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(body))
 	if err != nil {
 		return "", fmt.Errorf("fail to create request: %w", err)
 	}
@@ -158,7 +159,7 @@ func ChatCompletion(model, q string, f func(string)) (string, error) {
 				return "", fmt.Errorf("fail to unmarshal json: %w", err)
 			}
 			if chunk.Error != nil {
-				return "", fmt.Errorf("get monica response with error: %w", chunk.Error)
+				return "", fmt.Errorf("get monica response with error: %v", chunk.Error)
 			}
 			f(chunk.Text)
 			sb.WriteString(chunk.Text)

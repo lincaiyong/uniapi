@@ -1,6 +1,7 @@
 package baidupan
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"path"
@@ -17,12 +18,12 @@ func pathOf(sha1 string) string {
 	return path.Join("/object", sha1[:2], sha1[2:4], sha1[4:6], sha1[6:8], sha1[8:])
 }
 
-func PutObject(data []byte) (string, error) {
+func PutObject(ctx context.Context, data []byte) (string, error) {
 	hash := sha1Of(data)
 	filePath := pathOf(hash)
-	_, err := GetFileId(filePath)
+	_, err := GetFileId(ctx, filePath)
 	if err != nil {
-		err = Upload(filePath, data)
+		err = Upload(ctx, filePath, data)
 		if err != nil {
 			return "", err
 		}
@@ -30,17 +31,17 @@ func PutObject(data []byte) (string, error) {
 	return hash, nil
 }
 
-func GetObject(hash string) ([]byte, error) {
+func GetObject(ctx context.Context, hash string) ([]byte, error) {
 	filePath := pathOf(hash)
-	b, err := Download(filePath)
+	b, err := Download(ctx, filePath)
 	if err != nil {
 		return nil, err
 	}
 	return b, nil
 }
 
-func HasObject(hash string) bool {
+func HasObject(ctx context.Context, hash string) bool {
 	filePath := pathOf(hash)
-	_, err := GetFileId(filePath)
+	_, err := GetFileId(ctx, filePath)
 	return err == nil
 }

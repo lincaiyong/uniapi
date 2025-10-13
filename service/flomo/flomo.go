@@ -1,6 +1,7 @@
 package flomo
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -30,17 +31,17 @@ func Init(token string) {
 	gToken = token
 }
 
-func UpdatedMemo(slug string, latestUpdatedAt time.Time) ([]*Memo, error) {
+func UpdatedMemo(ctx context.Context, slug string, latestUpdatedAt time.Time) ([]*Memo, error) {
 	ret := make([]*Memo, 0)
 	limit := 200
-	memos, err := updatedMemoByPage(latestUpdatedAt, slug, limit)
+	memos, err := updatedMemoByPage(ctx, latestUpdatedAt, slug, limit)
 	if err != nil {
 		return nil, err
 	}
 	ret = append(ret, memos...)
 	for len(memos) == limit {
 		lastMemo := memos[len(memos)-1]
-		memos, err = updatedMemoByPage(lastMemo.UpdatedAt, lastMemo.Slug, limit)
+		memos, err = updatedMemoByPage(ctx, lastMemo.UpdatedAt, lastMemo.Slug, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +50,7 @@ func UpdatedMemo(slug string, latestUpdatedAt time.Time) ([]*Memo, error) {
 	return ret, nil
 }
 
-func updatedMemoByPage(latestUpdatedAt time.Time, slug string, limit int) ([]*Memo, error) {
+func updatedMemoByPage(ctx context.Context, latestUpdatedAt time.Time, slug string, limit int) ([]*Memo, error) {
 	baseURL := "https://flomoapp.com/api/v1/memo/updated/"
 
 	n := map[string]string{
@@ -77,7 +78,7 @@ func updatedMemoByPage(latestUpdatedAt time.Time, slug string, limit int) ([]*Me
 	params.Add("sign", sign)
 	fullURL := baseURL + "?" + params.Encode()
 	log.InfoLog(fullURL)
-	req, err := http.NewRequest("GET", fullURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

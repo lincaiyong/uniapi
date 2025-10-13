@@ -1,6 +1,7 @@
 package edgetts
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -22,7 +23,7 @@ func generateSecMsGec(edgeToken string) string {
 	return strings.ToUpper(hex.EncodeToString(hash[:]))
 }
 
-func EdgeTTS(text string) ([]byte, error) {
+func EdgeTTS(ctx context.Context, text string) ([]byte, error) {
 	edgeToken := "6A5AA1D4EAFF4E9FB37E23D68491D6F4" // check https://github.com/rany2/edge-tts/blob/master/src/edge_tts/constants.py
 	baseUrl := "api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
 	userAgent := "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
@@ -30,7 +31,7 @@ func EdgeTTS(text string) ([]byte, error) {
 	token := generateSecMsGec(edgeToken)
 	wssUrl := fmt.Sprintf("wss://%s?Ocp-Apim-Subscription-Key=%s&ConnectionId=%s&Sec-MS-GEC=%s&Sec-MS-GEC-Version=1-140.0.3485.14",
 		baseUrl, edgeToken, connectId, token)
-	conn, _, err := websocket.DefaultDialer.Dial(wssUrl, http.Header{
+	conn, _, err := websocket.DefaultDialer.DialContext(ctx, wssUrl, http.Header{
 		"User-Agent": []string{userAgent},
 	})
 	if err != nil {

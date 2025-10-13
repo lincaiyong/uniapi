@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/lincaiyong/uniapi/service/baidupan"
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/flomo"
-	"github.com/lincaiyong/uniapi/service/fornext"
 	"github.com/lincaiyong/uniapi/service/googletrans"
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
@@ -18,20 +18,7 @@ import (
 
 func monicaExample() {
 	monica.Init(os.Getenv("MONICA_SESSION_ID"))
-	_, err := monica.ChatCompletion(monica.ModelGPT4oMini, "131加412，春眠不觉晓，", func(s string) {
-		fmt.Print(s)
-	})
-	if err != nil {
-		fmt.Printf("fail to completion: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println()
-}
-
-func fornextExample() {
-	fornext.Init(os.Getenv("FORNEXT_SPACE_ID"), os.Getenv("FORNEXT_MODEL_NAME"), os.Getenv("FORNEXT_MODEL_ID"),
-		os.Getenv("FORNEXT_PROMPT_KEY"), os.Getenv("FORNEXT_PROMPT_PLATFORM_SESSION"))
-	_, err := fornext.ChatCompletion("3+4=", func(s string) {
+	_, err := monica.ChatCompletion(context.Background(), monica.ModelGPT4oMini, "131加412，春眠不觉晓，", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -42,7 +29,7 @@ func fornextExample() {
 }
 
 func edgettsExample() {
-	b, err := edgetts.EdgeTTS("你好，春眠不觉晓")
+	b, err := edgetts.EdgeTTS(context.Background(), "你好，春眠不觉晓")
 	if err != nil {
 		fmt.Printf("fail to run edgetts: %v\n", err)
 		os.Exit(1)
@@ -56,7 +43,7 @@ func edgettsExample() {
 }
 
 func youtubeExample() {
-	caption, err := youtube.DownloadAutoCaption("vStJoetOxJg")
+	caption, err := youtube.DownloadAutoCaption(context.Background(), "vStJoetOxJg")
 	if err != nil {
 		fmt.Printf("fail to download caption: %v\n", err)
 		os.Exit(1)
@@ -78,12 +65,12 @@ func baidupanExample() {
 	//	fmt.Printf("fail to upload baidupan: %v\n", err)
 	//	os.Exit(1)
 	//}
-	hash, err := baidupan.PutObject([]byte("hello world?"))
+	hash, err := baidupan.PutObject(context.Background(), []byte("hello world?"))
 	if err != nil {
 		fmt.Printf("fail to put baidupan: %v\n", err)
 		os.Exit(1)
 	}
-	b, err := baidupan.GetObject(hash)
+	b, err := baidupan.GetObject(context.Background(), hash)
 	if err != nil {
 		fmt.Printf("fail to get baidupan: %v\n", err)
 		os.Exit(1)
@@ -92,13 +79,13 @@ func baidupanExample() {
 }
 
 func googletransExample() {
-	text, err := googletrans.TranslateZhToEn("书籍是人类进步的阶梯。孤独是灵感的源泉。")
+	text, err := googletrans.TranslateZhToEn(context.Background(), "书籍是人类进步的阶梯。孤独是灵感的源泉。")
 	if err != nil {
 		fmt.Printf("fail to translate: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println(text)
-	text, err = googletrans.TranslateEnToZh(text)
+	text, err = googletrans.TranslateEnToZh(context.Background(), text)
 	if err != nil {
 		fmt.Printf("fail to translate: %v\n", err)
 		os.Exit(1)
@@ -108,12 +95,12 @@ func googletransExample() {
 
 func larkbotExample() {
 	larkbot.Init(os.Getenv("LARK_APP_ID"), os.Getenv("LARK_APP_SECRET"), os.Getenv("LARK_RECEIVE_ID"))
-	err := larkbot.Send("hello")
+	err := larkbot.Send(context.Background(), "hello")
 	if err != nil {
 		fmt.Printf("fail to send: %v\n", err)
 		os.Exit(1)
 	}
-	err = larkbot.SendTo("hello", "oc_ed80a3de8e524657faf5dafa847838f2")
+	err = larkbot.SendTo(context.Background(), "hello", "oc_ed80a3de8e524657faf5dafa847838f2")
 	if err != nil {
 		fmt.Printf("fail to send: %v\n", err)
 		os.Exit(1)
@@ -122,7 +109,7 @@ func larkbotExample() {
 
 func flomoExample() {
 	flomo.Init(os.Getenv("FLOMO_AUTH_TOKEN"))
-	memos, err := flomo.UpdatedMemo("", time.Now().Add(-1*time.Hour))
+	memos, err := flomo.UpdatedMemo(context.Background(), "", time.Now().Add(-1*time.Hour))
 	if err != nil {
 		fmt.Printf("fail to get memos: %v\n", err)
 		os.Exit(1)
@@ -165,7 +152,6 @@ func mysqlExample() {
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
-		//os.Args[1] = "fornext"
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
 		os.Args[1] = "baidupan"
@@ -179,8 +165,6 @@ func main() {
 	switch service {
 	case "monica":
 		monicaExample()
-	case "fornext":
-		fornextExample()
 	case "edgetts":
 		edgettsExample()
 	case "youtube":

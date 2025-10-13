@@ -1,6 +1,7 @@
 package baidupan
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/lincaiyong/log"
@@ -11,9 +12,9 @@ import (
 	"strings"
 )
 
-func downloadByLink(url string) ([]byte, error) {
+func downloadByLink(ctx context.Context, url string) ([]byte, error) {
 	log.InfoLog("download file by link: %s", url)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create request: %w", err)
 	}
@@ -38,12 +39,12 @@ func downloadByLink(url string) ([]byte, error) {
 	return bs, nil
 }
 
-func getTemplateVariable() (sign1, sign2 string, timestamp int, err error) {
+func getTemplateVariable(ctx context.Context) (sign1, sign2 string, timestamp int, err error) {
 	params := url.Values{}
 	params.Add("fields", `["sign1","timestamp","sign3"]`)
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/gettemplatevariable?%s", params.Encode())
 	var req *http.Request
-	req, err = http.NewRequest("GET", fullUrl, nil)
+	req, err = http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
 	if err != nil {
 		err = fmt.Errorf("fail to create request: %w", err)
 		return
@@ -90,8 +91,8 @@ func getTemplateVariable() (sign1, sign2 string, timestamp int, err error) {
 	return respJson.Result.Sign1, respJson.Result.Sign3, respJson.Result.Timestamp, nil
 }
 
-func getSignTimestamp() (string, int, error) {
-	sign1, sign3, timestamp, err := getTemplateVariable()
+func getSignTimestamp(ctx context.Context) (string, int, error) {
+	sign1, sign3, timestamp, err := getTemplateVariable(ctx)
 	if err != nil {
 		return "", 0, err
 	}
@@ -99,9 +100,9 @@ func getSignTimestamp() (string, int, error) {
 	return sign, timestamp, nil
 }
 
-func getDownloadLink(fileId int64) (string, error) {
+func getDownloadLink(ctx context.Context, fileId int64) (string, error) {
 	log.InfoLog("get download link: %d", fileId)
-	sign, timestamp, err := getSignTimestamp()
+	sign, timestamp, err := getSignTimestamp(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +111,7 @@ func getDownloadLink(fileId int64) (string, error) {
 	params.Add("sign", sign)
 	params.Add("timestamp", strconv.Itoa(timestamp))
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/download?%s", params.Encode())
-	req, err := http.NewRequest("GET", fullUrl, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
 	if err != nil {
 		return "", fmt.Errorf("fail to create request: %v", err)
 	}

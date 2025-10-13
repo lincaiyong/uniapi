@@ -2,6 +2,7 @@ package baidupan
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -15,7 +16,7 @@ import (
 	"strconv"
 )
 
-func uploadSuperFile(savePath, uploadId string, bs []byte) error {
+func uploadSuperFile(ctx context.Context, savePath, uploadId string, bs []byte) error {
 	log.InfoLog("upload super file: %s", uploadId)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -42,7 +43,7 @@ func uploadSuperFile(savePath, uploadId string, bs []byte) error {
 	params.Set("uploadsign", "0")
 	params.Set("partseq", "0")
 	fullUrl := fmt.Sprintf("https://c5.pcs.baidu.com/rest/2.0/pcs/superfile2?%s", params.Encode())
-	req, err := http.NewRequest("POST", fullUrl, body)
+	req, err := http.NewRequestWithContext(ctx, "POST", fullUrl, body)
 	if err != nil {
 		return fmt.Errorf("fail to create request: %v", err)
 	}
@@ -64,14 +65,14 @@ func uploadSuperFile(savePath, uploadId string, bs []byte) error {
 	return nil
 }
 
-func uploadPreCreate(savePath, md5 string) (string, error) {
+func uploadPreCreate(ctx context.Context, savePath, md5 string) (string, error) {
 	log.InfoLog("pre create: %s, %s", savePath, md5)
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/precreate")
 	formData := url.Values{}
 	formData.Set("path", savePath)
 	formData.Set("autoinit", "1")
 	formData.Set("block_list", fmt.Sprintf(`["%s"]`, md5))
-	req, err := http.NewRequest("POST", fullUrl, bytes.NewBufferString(formData.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", fullUrl, bytes.NewBufferString(formData.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("fail to create request: %v", err)
 	}
@@ -107,7 +108,7 @@ func uploadPreCreate(savePath, md5 string) (string, error) {
 	return respJson.UploadId, nil
 }
 
-func uploadCreate(savePath, uploadId, md5 string, size int) error {
+func uploadCreate(ctx context.Context, savePath, uploadId, md5 string, size int) error {
 	log.InfoLog("upload create: %s, %s", savePath, md5)
 	fullUrl := fmt.Sprintf("https://pan.baidu.com/api/create?isdir=0&app_id=250528&channel=chunlei&web=1&clienttype=0")
 	formData := url.Values{}
@@ -115,7 +116,7 @@ func uploadCreate(savePath, uploadId, md5 string, size int) error {
 	formData.Set("size", strconv.Itoa(size))
 	formData.Set("uploadid", uploadId)
 	formData.Set("block_list", fmt.Sprintf(`["%s"]`, md5))
-	req, err := http.NewRequest("POST", fullUrl, bytes.NewBufferString(formData.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", fullUrl, bytes.NewBufferString(formData.Encode()))
 	if err != nil {
 		return fmt.Errorf("fail to create request: %v", err)
 	}

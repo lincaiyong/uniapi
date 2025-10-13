@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,7 +17,7 @@ type SubtitleText struct {
 	Text      string
 }
 
-func requestCaptionTrackBaseUrl(client *http.Client, videoID string) (string, error) {
+func requestCaptionTrackBaseUrl(ctx context.Context, client *http.Client, videoID string) (string, error) {
 	reqUrl := "https://www.youtube.com/youtubei/v1/player?prettyPrint=false"
 	data, _ := json.Marshal(PlayerRequest{
 		Context: PlayerRequestContext{
@@ -27,7 +28,7 @@ func requestCaptionTrackBaseUrl(client *http.Client, videoID string) (string, er
 		},
 		VideoID: videoID,
 	})
-	req, err := http.NewRequest("POST", reqUrl, bytes.NewBuffer(data))
+	req, err := http.NewRequestWithContext(ctx, "POST", reqUrl, bytes.NewBuffer(data))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -56,9 +57,9 @@ func requestCaptionTrackBaseUrl(client *http.Client, videoID string) (string, er
 	return "", errors.New("no captions found for this video")
 }
 
-func requestTimedText(client *http.Client, trackBaseUrl string) (*Caption, error) {
+func requestTimedText(ctx context.Context, client *http.Client, trackBaseUrl string) (*Caption, error) {
 	reqUrl := trackBaseUrl + "&fmt=json3"
-	req, err := http.NewRequest("GET", reqUrl, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", reqUrl, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -82,17 +83,17 @@ func requestTimedText(client *http.Client, trackBaseUrl string) (*Caption, error
 	return &caption, nil
 }
 
-func DownloadAutoCaption(videoID string) (*Caption, error) {
+func DownloadAutoCaption(ctx context.Context, videoID string) (*Caption, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 		},
 	}
-	trackBaseUrl, err := requestCaptionTrackBaseUrl(client, videoID)
+	trackBaseUrl, err := requestCaptionTrackBaseUrl(ctx, client, videoID)
 	if err != nil {
 		return nil, err
 	}
-	caption, err := requestTimedText(client, trackBaseUrl)
+	caption, err := requestTimedText(ctx, client, trackBaseUrl)
 	if err != nil {
 		return nil, err
 	}
