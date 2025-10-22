@@ -9,12 +9,6 @@ import (
 	"net/http"
 )
 
-/*
-GET /x/relation/followings?vmid=109372877 HTTP/2
-Host: api.bilibili.com
-Cookie: SESSDATA=71b6fef9%2C1776694329%2C9225a%2Aa2CjDNVpNYD54IOCWHBZdCKveo3_pw8CzLxIEA30IvnukLBjs6ZuzeC6dvXjna7A9V7YwSVjRKRVVJRDluM0NKejdoUVlfNHNkbFZwTlpLenpoYV9KajNuVURMYWgtQTItdkRwTFFiMVRleGZXeXhMSUlid2V3cl90RF91aWxMR21yV1NoR3pXeWV3IIEC;
-*/
-
 var sessData, biliJCT, vmId string
 
 func Init(sessData_, biliJCT_, vmId_ string) {
