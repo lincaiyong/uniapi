@@ -18,8 +18,7 @@ import (
 
 func monicaExample() {
 	monica.Init(os.Getenv("MONICA_SESSION_ID"))
-	monica.Init("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTkyMDIzOTgsImlzcyI6Im1vbmljYSIsInVzZXJfaWQiOjYxMzI4ODQxLCJ1c2VyX25hbWUiOiJhbmR5IiwianRpIjoiM2ZiYzdiYjg5MmVjNDJkMWEzYzUxNDBmNDFhNWNhNTQiLCJjbGllbnRfdHlwZSI6IndlYiJ9.mwebQik9jLwc5Ev5ginS-3hbUP2dj8z6SZFY1nVzxlA")
-	_, err := monica.ChatCompletion(context.Background(), monica.ModelGPT41Mini, "131加412111，春眠不觉晓，", func(s string) {
+	_, err := monica.ChatCompletion(context.Background(), monica.ModelClaude4Sonnet, "131加412，春眠不觉晓，", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -155,7 +154,7 @@ func main() {
 		os.Args = []string{"x", "monica"}
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
-		//os.Args[1] = "baidupan"
+		os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
 		//os.Args[1] = "flomo"
