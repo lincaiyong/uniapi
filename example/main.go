@@ -154,7 +154,7 @@ func main() {
 		os.Args = []string{"x", "monica"}
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
-		//os.Args[1] = "baidupan"
+		os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
 		//os.Args[1] = "flomo"
