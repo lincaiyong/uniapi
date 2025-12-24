@@ -18,7 +18,7 @@ import (
 
 func monicaExample() {
 	monica.Init(os.Getenv("MONICA_SESSION_ID"))
-	_, err := monica.ChatCompletion(context.Background(), monica.ModelClaude4Sonnet, "131加412，春眠不觉晓，", func(s string) {
+	_, err := monica.ChatCompletion(context.Background(), monica.ModelDeepSeekV31, "131加412，春眠不觉晓，", func(s string) {
 		fmt.Print(s)
 	})
 	if err != nil {
@@ -154,7 +154,7 @@ func main() {
 		os.Args = []string{"x", "monica"}
 		//os.Args[1] = "edgetts"
 		//os.Args[1] = "youtube"
-		os.Args[1] = "baidupan"
+		//os.Args[1] = "baidupan"
 		//os.Args[1] = "googletrans"
 		//os.Args[1] = "larkbot"
 		//os.Args[1] = "flomo"
