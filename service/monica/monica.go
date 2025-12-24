@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/lincaiyong/log"
 	"github.com/lincaiyong/uniapi/utils"
 	"net/http"
 	"strings"
@@ -160,8 +159,7 @@ func ChatCompletion(ctx context.Context, model, q string, f func(string)) (strin
 				return "", fmt.Errorf("fail to unmarshal json: %w", err)
 			}
 			if chunk.Error != nil {
-				log.WarnLog("read chunk error: %v", chunk.Error)
-				continue
+				return "", fmt.Errorf("read chunk error: %v", chunk.Error)
 			}
 			f(chunk.Text)
 			sb.WriteString(chunk.Text)
