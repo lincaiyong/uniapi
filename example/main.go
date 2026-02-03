@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/lincaiyong/erro"
+	"github.com/lincaiyong/log"
 	"github.com/lincaiyong/uniapi/service/baidupan"
 	"github.com/lincaiyong/uniapi/service/edgetts"
 	"github.com/lincaiyong/uniapi/service/flomo"
@@ -11,6 +13,7 @@ import (
 	"github.com/lincaiyong/uniapi/service/larkbot"
 	"github.com/lincaiyong/uniapi/service/monica"
 	"github.com/lincaiyong/uniapi/service/mysql"
+	"github.com/lincaiyong/uniapi/service/playwright"
 	"github.com/lincaiyong/uniapi/service/youtube"
 	"os"
 	"time"
@@ -149,6 +152,18 @@ func mysqlExample() {
 	fmt.Println(user)
 }
 
+func playwrightExample() {
+	defer erro.Recover(func(e error) {
+		log.ErrorLog("%v", e)
+	})
+	result := erro.Check1(playwright.GetCookies("https://pan.baidu.com/disk/main", "div.wp-s-header-user__body", "BDUSS,STOKEN"))
+	log.InfoLog("result: %v", result)
+	baidupan.Init(result[0], result[1])
+	hash := erro.Check1(baidupan.PutObject(context.Background(), []byte("hello world?")))
+	b := erro.Check1(baidupan.GetObject(context.Background(), hash))
+	fmt.Println(string(b))
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Args = []string{"x", "monica"}
@@ -160,6 +175,7 @@ func main() {
 		//os.Args[1] = "flomo"
 		//os.Args[1] = "object"
 		//os.Args[1] = "mysql"
+		os.Args[1] = "playwright"
 	}
 	service := os.Args[1]
 	switch service {
@@ -179,5 +195,7 @@ func main() {
 		flomoExample()
 	case "mysql":
 		mysqlExample()
+	case "playwright":
+		playwrightExample()
 	}
 }
