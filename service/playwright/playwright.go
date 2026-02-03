@@ -8,7 +8,7 @@ import (
 )
 
 func GetCookies(url, element, cookies string) (result []string, err error) {
-	defer erro.Recover(func(e error) { e = err })
+	defer erro.Recover(func(e error) { err = e })
 
 	log.InfoLog("start playwright")
 	pw := erro.Check1(playwright.Run())
